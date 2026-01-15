@@ -1,0 +1,18 @@
+{
+    "name": "anki-theme",
+    "package": "anki-theme",
+    "version": "1.0.0",
+    "author": "Claude Code",
+    "homepage": "https://github.com/anki-addons/anki-theme",
+    "supported_anki_versions": [
+        "2.1.50", "2.1.51", "2.1.52", "2.1.53", "2.1.54", "2.1.55",
+        "2.1.56", "2.1.57", "2.1.58", "23.10", "23.12", "24.04",
+        "24.06", "24.10", "25.01", "25.09"
+    ],
+    "human_readable_name": "Anki Beautify Theme",
+    "description": "A refined Anki theme inspired by Japanese editorial design. Features warm paper textures, Noto Serif JP typography for headlines, Inter for body text, and traditional vermilion (朱色) accents. Includes carefully crafted light and dark modes.",
+    "category": "appearance",
+    "tags": ["theme", "japanese", "editorial", "minimal", "light", "dark"],
+    "min_point_version": 50,
+    "max_point_version": 999999999
+}
