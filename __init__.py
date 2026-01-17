@@ -701,9 +701,47 @@ a:hover {{
 class WashiThemeManager:
     """和纸主题管理器"""
 
+    # CSS cache for performance optimization
+    _css_cache_light = None
+    _css_cache_dark = None
+    _global_css_cache_light = None
+    _global_css_cache_dark = None
+    _web_css_cache_light = None
+    _web_css_cache_dark = None
+
     def __init__(self):
         self.styled_widgets = []
         self.webviews = []
+        self._current_is_dark = None
+
+    def _invalidate_css_cache(self) -> None:
+        """清除CSS缓存（当主题切换时调用）"""
+        self._css_cache_light = None
+        _css_cache_dark = None
+        self._global_css_cache_light = None
+        self._global_css_cache_dark = None
+        self._web_css_cache_light = None
+        self._web_css_cache_dark = None
+
+    def _get_cached_css(self, cache_attr: str, colors: Dict[str, str], css_generator_func) -> str:
+        """获取缓存的CSS或生成新的CSS"""
+        cache_value = getattr(self, cache_attr)
+        if cache_value is not None:
+            return cache_value
+
+        # 生成并缓存CSS
+        css = css_generator_func(colors)
+        setattr(self, cache_attr, css)
+        return css
+
+    @property
+    def is_dark(self) -> bool:
+        current_dark = theme_manager.night_mode
+        # 检测主题切换并清除缓存
+        if self._current_is_dark != current_dark:
+            self._current_is_dark = current_dark
+            self._invalidate_css_cache()
+        return current_dark
 
     @property
     def is_dark(self) -> bool:
@@ -763,8 +801,15 @@ class WashiThemeManager:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def inject_washi_styles(web_content: aqt.webview.WebContent, context: Optional[object]) -> None:
-    """注入和纸样式到网页"""
-    css = _get_web_css(theme_manager_instance.colors)
+    """注入和纸样式到网页（使用缓存优化）"""
+    colors = theme_manager_instance.colors
+    is_dark = theme_manager_instance.is_dark
+    cache_attr = '_web_css_cache_dark' if is_dark else '_web_css_cache_light'
+
+    # 使用缓存的CSS
+    css = theme_manager_instance._get_cached_css(
+        cache_attr, colors, _get_web_css
+    )
 
     styles = f'''
     <style id="washi-theme">
@@ -776,8 +821,15 @@ def inject_washi_styles(web_content: aqt.webview.WebContent, context: Optional[o
         web_content.head += styles
 
 def update_webview_styles(webview: AnkiWebView) -> None:
-    """更新网页视图样式"""
-    css = _get_web_css(theme_manager_instance.colors)
+    """更新网页视图样式（使用缓存优化）"""
+    colors = theme_manager_instance.colors
+    is_dark = theme_manager_instance.is_dark
+    cache_attr = '_web_css_cache_dark' if is_dark else '_web_css_cache_light'
+
+    # 使用缓存的CSS
+    css = theme_manager_instance._get_cached_css(
+        cache_attr, colors, _get_web_css
+    )
 
     js = f'''
     (() => {{
